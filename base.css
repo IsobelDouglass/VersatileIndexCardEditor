@@ -1,0 +1,307 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root { 
+    --text-color: #1c1917; 
+    --contrast-and-borders-color: #47413d;
+    --background-base-color: #78716c; 
+    --cards-and-binder-color: #d6d3d1;
+    --cards-divider-color: #f5f5f4;
+    --font: 'Helvetica', sans-serif;
+}
+
+body {
+    background-color: var(--background-base-color);
+    height: 100%;
+}
+
+header {
+    background-color: var(--cards-and-binder-color);
+    color: var(--text-color);
+    font-family: var(--font);
+    font-weight: 300;
+    padding: 10px;
+    justify-content: center;
+}
+
+main {
+    color: var(--text-color);
+    font-family: var(--font);
+    padding: 20px;
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 300;
+    text-align: center;
+}
+
+h2 {
+    font-size: 24px;
+}
+
+h3 {
+    font-size: 20px;
+}
+
+p {
+    font-size: 16px;
+}
+
+.card {
+    background-color: var(--cards-and-binder-color);
+    width: 375px;
+    height: 225px; 
+    border-radius: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.card-divider {
+    border-bottom: 1px solid var(--cards-divider-color);
+    height: 2px;
+    border-radius: 9999px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ---------- LAYOUT ---------- */
+html, body {
+    height: 100vh;
+    overflow: hidden;           /* prevent body scroll; panels scroll internally */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    font-family: var(--font);
+}
+
+header {
+    flex-shrink: 0;
+    background-color: var(--cards-and-binder-color);
+    color: var(--text-color);
+    font-weight: 300;
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--contrast-and-borders-color);
+    z-index: 10;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ---------- BINDER / SIDEBAR ---------- */
+.binder {
+    width: 260px;
+    background-color: var(--cards-and-binder-color);
+    border-right: 1px solid var(--contrast-and-borders-color);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* The tree list */
+.nav-list {
+    list-style: none;
+    flex: 1;                    /* pushes footer to bottom */
+    overflow-y: auto;
+    padding: 8px 0;
+    margin: 0;
+}
+
+#add-folder-btn,
+#add-card-btn {
+    border-radius: 0;
+}
+
+/* Individual binder items */
+.nav-list li {
+    padding: 3px 6px;
+    margin: 1px 8px;
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-color);
+    user-select: none;
+    border-bottom: 1px solid var(--contrast-and-borders-color);
+}
+
+.nav-list li:hover {
+    background-color: rgba(71, 65, 61, 0.08);
+}
+
+/* Selected / active item (Scrivener blue-grey highlight vibe) */
+.nav-list li.active {
+    background-color: var(--contrast-and-borders-color);
+    color: var(--cards-divider-color);
+}
+
+/* Folder vs Card icons */
+.nav-list li.folder::before {
+    content: "▶";
+    font-size: 9px;
+    width: 12px;
+    text-align: center;
+    color: var(--contrast-and-borders-color);
+    transition: transform 0.15s ease;
+}
+
+.nav-list li.folder.expanded::before {
+    transform: rotate(90deg);
+}
+
+.nav-list li.card-item::before {
+    content: "▭";
+    font-size: 10px;
+    width: 12px;
+    text-align: center;
+    color: var(--contrast-and-borders-color);
+}
+
+/* Indentation levels for nested items */
+.nav-list li.level-0 { padding-left: 12px; }
+.nav-list li.level-1 { padding-left: 28px; }
+.nav-list li.level-2 { padding-left: 44px; }
+.nav-list li.level-3 { padding-left: 60px; }
+
+/* ---------- SIDEBAR FOOTER (buttons) ---------- */
+.sidebar-footer {
+    padding: 10px;
+    border-top: 1px solid var(--contrast-and-borders-color);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-primary {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--contrast-and-borders-color);
+    color: var(--cards-divider-color);
+    font-family: var(--font);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+/* ---------- MAIN EDITOR AREA ---------- */
+main {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--background-base-color);
+    padding: 20px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;                  /* spacing between cards */
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.item {
+  padding: 16px 20px;
+  margin: 8px 0;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: grab;
+  transition: transform 0.15s, box-shadow 0.15s;
+  user-select: none;
+}
+
+.item:active {
+  cursor: grabbing;
+}
+
+/* Style for the element being dragged */
+.item.dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Visual indicator for drop position */
+.item.over {
+  border-top: 3px solid #3b82f6;
+}
+
+.mini-line-divider {
+    height: 1px;
+    background-color: var(--contrast-and-borders-color);
+    margin: 4px 0;
+}  
+
+.cont-main-line-divider {
+    height: 1px;
+    background-color: var(--contrast-and-borders-color);
+    margin: 4px 0;
+}
+
+.folder-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.mini-line-divider {
+    width: 65px;       /* length of short line */
+    height: 2px;       /* thickness */
+    background: #000;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.folder-title {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.cont-main-line-divider {
+    flex: 1;           /* takes up all remaining space */
+    height: 2px;
+    background: #000;
+    border-radius: 999px;
+}
+
+.indent {
+    padding-left: 8px;
+}
+
+.indent-2 {
+    padding-left: 16px;
+}
