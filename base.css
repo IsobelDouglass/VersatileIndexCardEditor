@@ -320,14 +320,24 @@ main {
     padding-left: 16px;
 }
 
-/* editable fields: replace the default focus outline with a subtle, always-on border */
+/* editable fields: replace the default focus outline with a subtle border, shown only while focused */
 .card-title,
 .card-content,
 .folder-title,
 .card-listing,
 .folder-listing {
-    outline: none;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    outline: none !important;
+    box-shadow: none !important;
+    forced-color-adjust: none;
+    border: 1px solid transparent;
+}
+
+.card-title:focus,
+.card-content:focus,
+.folder-title:focus,
+.card-listing:focus,
+.folder-listing:focus {
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* placeholder for empty card content, hidden while actively editing */

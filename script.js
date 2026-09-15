@@ -95,10 +95,20 @@ function loadFromStorage() {
     if (!saved) return;
 
     itemsList = JSON.parse(saved);
+
+    //one-time cleanup: cards saved before the placeholder feature existed have the
+    //old default text stored literally — clear it so the CSS placeholder shows again
+    itemsList.forEach((item) => {
+        if (item.type === 'card' && item['card-content'] === 'Card content goes here.') {
+            item['card-content'] = '';
+        }
+    });
+
     renderPage();
 
     cardCount = itemsList.filter((item) => item.type === 'card').length;
     cardCounter.textContent = cardCount;
+    saveToStorage();
 }
 
 //keeps a card/folder's title in sync with its binder listing, whichever side was just edited
