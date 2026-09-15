@@ -288,7 +288,21 @@ main {
 
 .folder-title {
     margin: 0;
+}
+
+.card-title,
+.folder-title {
     white-space: nowrap;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+.card-title:focus,
+.folder-title:focus {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
 }
 
 .cont-main-line-divider {
@@ -304,4 +318,21 @@ main {
 
 .indent-2 {
     padding-left: 16px;
+}
+
+/* editable fields: replace the default focus outline with a subtle, always-on border */
+.card-title,
+.card-content,
+.folder-title,
+.card-listing,
+.folder-listing {
+    outline: none;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* placeholder for empty card content, hidden while actively editing */
+.card-content:empty:not(:focus)::before {
+    content: attr(data-placeholder);
+    color: var(--background-base-color);
+    pointer-events: none;
 }

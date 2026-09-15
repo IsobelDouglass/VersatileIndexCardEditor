@@ -35,7 +35,7 @@ function renderPage() {
             newCard.innerHTML = `
                 <h2 class="card-title" contenteditable="true">${item['card-title'] ?? 'Card Title'}</h2>
                 <div class="card-divider"></div>
-                <p class="card-content" contenteditable="true">${item['card-content'] ?? 'Card content goes here.'}</p>
+                <p class="card-content" contenteditable="true" data-placeholder="Card content goes here.">${item['card-content'] ?? ''}</p>
             `;
             container.appendChild(newCard);
 
@@ -101,7 +101,6 @@ function loadFromStorage() {
     cardCounter.textContent = cardCount;
 }
 
-//lock input text - blur doesn't bubble, so listen for focusout instead.
 //keeps a card/folder's title in sync with its binder listing, whichever side was just edited
 document.addEventListener('focusout', (e) => {
     const target = e.target;
@@ -129,12 +128,30 @@ document.addEventListener('focusout', (e) => {
     saveToStorage();
 });
 
+//single-line title fields: Enter exits editing instead of inserting a line break
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('.card-title, .folder-title')) {
+        e.preventDefault();
+        e.target.blur();
+    }
+});
+
+//strip line breaks from pasted text in single-line title fields
+document.addEventListener('paste', (e) => {
+    if (!e.target.matches('.card-title, .folder-title')) return;
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData)
+        .getData('text/plain')
+        .replace(/[\r\n]+/g, ' ');
+    document.execCommand('insertText', false, text);
+});
+
 
 //add new index card button + card counter
 addCardBtn.addEventListener('click', () => {
     const cardId = createNewId();
     const title = 'Card Title';
-    const content = 'Card content goes here.';
+    const content = '';
 
     const newCard = document.createElement('div');
     newCard.setAttribute('class', 'card');
@@ -142,7 +159,7 @@ addCardBtn.addEventListener('click', () => {
     newCard.innerHTML = `
         <h2 class="card-title" contenteditable="true">${title}</h2>
         <div class="card-divider"></div>
-        <p class="card-content" contenteditable="true">${content}</p>
+        <p class="card-content" contenteditable="true" data-placeholder="Card content goes here.">${content}</p>
     `;
     container.appendChild(newCard);
 
