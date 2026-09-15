@@ -25,7 +25,7 @@ function createNewId() {
     return id;
 }
 
-//render page
+//render page — only called on initial load, rebuilds from itemsList
 function renderPage() {
     itemsList.forEach((item) => {
         if (item.type === 'card') {
@@ -33,11 +33,18 @@ function renderPage() {
             newCard.setAttribute('class', 'card');
             newCard.setAttribute('data-card-id', item.id);
             newCard.innerHTML = `
-                <h2 class="card-title">Card Title</h2>
+                <h2 class="card-title" contenteditable="true">${item['card-title'] ?? 'Card Title'}</h2>
                 <div class="card-divider"></div>
-                <p class="card-content">Card content goes here.</p>
+                <p class="card-content" contenteditable="true">${item['card-content'] ?? 'Card content goes here.'}</p>
             `;
             container.appendChild(newCard);
+
+            const cardListing = document.createElement('li');
+            cardListing.className = 'card-listing';
+            cardListing.dataset.cardId = item.id;
+            cardListing.setAttribute('contenteditable', 'true');
+            cardListing.textContent = item['card-title'] ?? 'Card Title';
+            navList.appendChild(cardListing);
         }
         if (item.type === 'folder') {
             const newFolder = document.createElement('div');
@@ -46,57 +53,133 @@ function renderPage() {
             newFolder.innerHTML = `
                 <div class="folder-header">
                     <div class="mini-line-divider"></div>
-                    <h2 class="folder-title">Folder Title</h2>
+                    <h2 class="folder-title" contenteditable="true">${item['folder-title'] ?? 'Folder Title'}</h2>
                     <div class="cont-main-line-divider"></div>
                 </div>
             `;
             container.appendChild(newFolder);
+
+            const folderListing = document.createElement('li');
+            folderListing.className = 'folder-listing';
+            folderListing.dataset.folderId = item.id;
+            folderListing.setAttribute('contenteditable', 'true');
+            folderListing.textContent = item['folder-title'] ?? 'Folder Title';
+            navList.appendChild(folderListing);
         }
     });
 }
 
-//lock input text
-document.addEventListener('blur', () => {
-    if (
-        //click off input
-        ) saveToStorage();
+//save current card/folder text into itemsList and persist to localStorage
+function saveToStorage() {
+    itemsList.forEach((item) => {
+        if (item.type === 'card') {
+            const cardEl = container.querySelector(`.card[data-card-id="${item.id}"]`);
+            if (cardEl) {
+                item['card-title'] = cardEl.querySelector('.card-title').textContent;
+                item['card-content'] = cardEl.querySelector('.card-content').textContent;
+            }
+        }
+        if (item.type === 'folder') {
+            const folderEl = container.querySelector(`.folder[data-folder-id="${item.id}"]`);
+            if (folderEl) {
+                item['folder-title'] = folderEl.querySelector('.folder-title').textContent;
+            }
+        }
+    });
+    localStorage.setItem('indexCardsData', JSON.stringify(itemsList));
+}
+
+//load saved cards/folders from localStorage
+function loadFromStorage() {
+    const saved = localStorage.getItem('indexCardsData');
+    if (!saved) return;
+
+    itemsList = JSON.parse(saved);
+    renderPage();
+
+    cardCount = itemsList.filter((item) => item.type === 'card').length;
+    cardCounter.textContent = cardCount;
+}
+
+//lock input text - blur doesn't bubble, so listen for focusout instead.
+//keeps a card/folder's title in sync with its binder listing, whichever side was just edited
+document.addEventListener('focusout', (e) => {
+    const target = e.target;
+
+    if (target.matches('.card-title')) {
+        const cardId = target.closest('.card').dataset.cardId;
+        const listing = navList.querySelector(`.card-listing[data-card-id="${cardId}"]`);
+        if (listing) listing.textContent = target.textContent;
+    } else if (target.matches('.folder-title')) {
+        const folderId = target.closest('.folder').dataset.folderId;
+        const listing = navList.querySelector(`.folder-listing[data-folder-id="${folderId}"]`);
+        if (listing) listing.textContent = target.textContent;
+    } else if (target.matches('.card-listing')) {
+        const cardId = target.dataset.cardId;
+        const cardTitle = container.querySelector(`.card[data-card-id="${cardId}"] .card-title`);
+        if (cardTitle) cardTitle.textContent = target.textContent;
+    } else if (target.matches('.folder-listing')) {
+        const folderId = target.dataset.folderId;
+        const folderTitle = container.querySelector(`.folder[data-folder-id="${folderId}"] .folder-title`);
+        if (folderTitle) folderTitle.textContent = target.textContent;
+    } else {
+        return;
+    }
+
+    saveToStorage();
 });
 
 
 //add new index card button + card counter
 addCardBtn.addEventListener('click', () => {
-    let newCard = document.createElement('div');
-    let cardId = createNewId();
+    const cardId = createNewId();
+    const title = 'Card Title';
+    const content = 'Card content goes here.';
+
+    const newCard = document.createElement('div');
     newCard.setAttribute('class', 'card');
     newCard.setAttribute('data-card-id', cardId);
     newCard.innerHTML = `
-        <h2 class="card-title">Card Title</h2>
+        <h2 class="card-title" contenteditable="true">${title}</h2>
         <div class="card-divider"></div>
-        <p class="card-content">Card content goes here.</p>
+        <p class="card-content" contenteditable="true">${content}</p>
     `;
     container.appendChild(newCard);
 
     const cardListing = document.createElement('li');
     cardListing.className = 'card-listing';
-    cardListing.textContent = 'Card Title';
+    cardListing.dataset.cardId = cardId;
+    cardListing.setAttribute('contenteditable', 'true');
+    cardListing.textContent = title;
     navList.appendChild(cardListing);
 
-    itemsList.push({ id: cardId, type: 'card' });
+    itemsList.push({
+        id: cardId,
+        'parent-id': null,
+        type: 'card',
+        'indent-count': 0,
+        'card-title': title,
+        'card-content': content,
+        'page-content': null
+    });
 
     cardCount++;
     cardCounter.textContent = cardCount;
-}); 
+    saveToStorage();
+});
 
 //add new folder button
 addFolderBtn.addEventListener('click', () => {
     const folderId = createNewId();
+    const title = 'Folder Title';
+
     const newFolder = document.createElement('div');
     newFolder.className = 'folder';
     newFolder.dataset.folderId = folderId;
     newFolder.innerHTML = `
     <div class="folder-header">
         <div class="mini-line-divider"></div>
-        <h2 class="folder-title">Folder Title</h2>
+        <h2 class="folder-title" contenteditable="true">${title}</h2>
         <div class="cont-main-line-divider"></div>
     </div>
     `;
@@ -105,10 +188,19 @@ addFolderBtn.addEventListener('click', () => {
     const folderListing = document.createElement('li');
     folderListing.className = 'folder-listing';
     folderListing.dataset.folderId = folderId;
-    folderListing.textContent = 'Folder Title';
+    folderListing.setAttribute('contenteditable', 'true');
+    folderListing.textContent = title;
     navList.appendChild(folderListing);
 
-    itemsList.push({ id: folderId, type: 'folder' });
+    itemsList.push({
+        id: folderId,
+        'parent-id': null,
+        type: 'folder',
+        'indent-count': 0,
+        'folder-title': title,
+        'folder-content': []
+    });
+    saveToStorage();
 });
 
 //binder navigation
@@ -137,3 +229,6 @@ addAttribute("folder_id", "----")
 //drag and drop in binder
 
 //open index card
+
+//load any saved cards/folders on page start
+loadFromStorage();
